@@ -20,23 +20,21 @@ public final class Demo {
 
     Subscriber<Review> oldFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() < UNIX_FILTER_TIME,
-        review -> {
+        review -> { // Todo write to file
         });
     Subscriber<Review> newFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() >= UNIX_FILTER_TIME,
-        review -> {
+        review -> { // Todo write to file
         });
 
     broker.subscribe(oldFilter);
     broker.subscribe(newFilter);
 
-    Runnable appRead = () -> {
-      FileJsonParser.parseFile(APPS_FILENAME, Review.class).forEach(broker::publish);
-    };
+    Runnable appRead = () -> FileJsonParser.parseFile(APPS_FILENAME, Review.class)
+        .forEach(broker::publish);
 
-    Runnable homeRead = () -> {
-      FileJsonParser.parseFile(HOME_KITCHEN_FILENAME, Review.class).forEach(broker::publish);
-    };
+    Runnable homeRead = () -> FileJsonParser.parseFile(HOME_KITCHEN_FILENAME, Review.class)
+        .forEach(broker::publish);
 
     Thread appThread = new Thread(appRead, APPS_FILENAME);
     Thread homeThread = new Thread(homeRead, HOME_KITCHEN_FILENAME);

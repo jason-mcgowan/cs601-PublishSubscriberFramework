@@ -1,10 +1,12 @@
 package cs601.project2;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SynchronousOrderedDispatchBroker<T> implements Broker<T> {
 
-  private final ArrayList<Subscriber<T>> subscribers = new ArrayList<>();
+  private final List<Subscriber<T>> subscribers = Collections.synchronizedList(new ArrayList<>());
 
   /**
    * Called by a publisher to publish a new item. The item will be delivered to all current
@@ -14,7 +16,7 @@ public class SynchronousOrderedDispatchBroker<T> implements Broker<T> {
    */
   @Override
   public synchronized void publish(T item) {
-    subscribers.forEach(sub-> sub.onEvent(item));
+    subscribers.forEach(sub -> sub.onEvent(item));
   }
 
   /**
@@ -24,7 +26,7 @@ public class SynchronousOrderedDispatchBroker<T> implements Broker<T> {
    * @param subscriber
    */
   @Override
-  public void subscribe(Subscriber<T> subscriber) {
+  public synchronized void subscribe(Subscriber<T> subscriber) {
     subscribers.add(subscriber);
   }
 
@@ -34,7 +36,7 @@ public class SynchronousOrderedDispatchBroker<T> implements Broker<T> {
    * all subscribers.
    */
   @Override
-  public void shutdown() {
-
+  public synchronized void shutdown() {
+    subscribers.clear();
   }
 }

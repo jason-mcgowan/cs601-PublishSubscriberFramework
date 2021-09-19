@@ -30,11 +30,10 @@ public final class FileJsonParser {
 
     Gson gson = new GsonBuilder().setLenient().create();
 
-    // Lazily reads each line, parses to object, adds to database if not null
     try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
       return lines.map(line -> parse(gson, line, classType)).collect(Collectors.toList());
     } catch (IOException e) {
-      e.printStackTrace();
+      System.out.println(e.getLocalizedMessage());
     }
     return new ArrayList<>();
   }
