@@ -1,4 +1,4 @@
-package cs601.project2.Framework;
+package cs601.project2.FilterApp;
 
 import java.util.Arrays;
 

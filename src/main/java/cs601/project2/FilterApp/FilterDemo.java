@@ -3,7 +3,6 @@ package cs601.project2.FilterApp;
 import cs601.project2.Framework.AsyncOrderedDispatchBroker;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.FilterSub;
-import cs601.project2.Framework.Review;
 import cs601.project2.Framework.Subscriber;
 import cs601.project2.Framework.SynchronousOrderedDispatchBroker;
 
@@ -18,19 +17,19 @@ public final class FilterDemo {
 
   public static void main(String[] args) {
 
-//    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
-    Broker<Review> broker = new AsyncOrderedDispatchBroker<>();
+    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
+//    Broker<Review> broker = new AsyncOrderedDispatchBroker<>();
 
     Subscriber<Review> oldFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() < UNIX_FILTER_TIME,
         review -> {
-          System.out.println("Old: " + review);
+//          System.out.println("Old: " + review);
           // Todo write to file
         });
     Subscriber<Review> newFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() >= UNIX_FILTER_TIME,
         review -> {
-          System.out.println("New: " + review);
+//          System.out.println("New: " + review);
           // Todo write to file
         });
 
@@ -49,14 +48,21 @@ public final class FilterDemo {
     appThread.start();
     homeThread.start();
 
+    long start = System.currentTimeMillis();
+
+    System.out.println("Threads started");
     try {
       appThread.join();
+      System.out.println("Joined appthread");
       homeThread.join();
+      System.out.println("Joined homethread");
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+    System.out.println("Shutting down");
     broker.shutdown();
-
+    System.out.println("Shutdown complete");
+    System.out.println("Runtime: " + (System.currentTimeMillis() - start));
   }
 
 }

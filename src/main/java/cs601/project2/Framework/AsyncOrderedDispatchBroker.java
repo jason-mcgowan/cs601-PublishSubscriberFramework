@@ -1,6 +1,7 @@
 package cs601.project2.Framework;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
@@ -10,6 +11,7 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   public AsyncOrderedDispatchBroker() {
     reader.start();
+    ExecutorService consumer = Executors.newSingleThreadExecutor();
   }
 
   private void readPublishers() {
