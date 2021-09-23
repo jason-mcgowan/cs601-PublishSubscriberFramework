@@ -1,4 +1,4 @@
-package cs601.project2;
+package cs601.project2.Framework;
 
 public interface Broker<T> {
 
@@ -8,7 +8,7 @@ public interface Broker<T> {
    *
    * @param item
    */
-  public void publish(T item);
+  void publish(T item);
 
   /**
    * Called once by each subscriber. Subscriber will be
@@ -17,7 +17,7 @@ public interface Broker<T> {
    *
    * @param subscriber
    */
-  public void subscribe(Subscriber<T> subscriber);
+  void subscribe(Subscriber<T> subscriber);
 
   /**
    * Indicates this broker should stop accepting new
@@ -25,5 +25,5 @@ public interface Broker<T> {
    * The method will block until all items that have been
    * published have been delivered to all subscribers.
    */
-  public void shutdown();
+  void shutdown();
 }

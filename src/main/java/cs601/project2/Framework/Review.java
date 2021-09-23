@@ -1,4 +1,4 @@
-package cs601.project2;
+package cs601.project2.Framework;
 
 import java.util.Arrays;
 

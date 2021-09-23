@@ -1,6 +1,5 @@
-package cs601.project2.FilterApp;
+package cs601.project2.Framework;
 
-import cs601.project2.Subscriber;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -18,7 +17,7 @@ public class FilterSub<T> implements Subscriber<T> {
   }
 
   /**
-   * If the filter condition is met, sends the item to {@link #onFilter} for processing
+   * If the filter condition is met, sends the item to {@link #onFilter} for processing.
    *
    * @param item Item to check filter and process if true
    */

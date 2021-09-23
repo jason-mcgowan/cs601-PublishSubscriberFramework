@@ -1,4 +1,4 @@
-package cs601.project2;
+package cs601.project2.Framework;
 
 public interface Subscriber<T> {
 
@@ -7,5 +7,5 @@ public interface Subscriber<T> {
    *
    * @param item
    */
-  public void onEvent(T item);
+  void onEvent(T item);
 }
