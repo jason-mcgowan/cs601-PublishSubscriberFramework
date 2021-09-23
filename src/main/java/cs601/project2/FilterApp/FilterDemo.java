@@ -1,5 +1,6 @@
 package cs601.project2.FilterApp;
 
+import cs601.project2.Framework.AsyncOrderedDispatchBroker;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.FilterSub;
 import cs601.project2.Framework.Review;
@@ -17,16 +18,20 @@ public final class FilterDemo {
 
   public static void main(String[] args) {
 
-
-    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
+//    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
+    Broker<Review> broker = new AsyncOrderedDispatchBroker<>();
 
     Subscriber<Review> oldFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() < UNIX_FILTER_TIME,
-        review -> { // Todo write to file
+        review -> {
+          System.out.println("Old: " + review);
+          // Todo write to file
         });
     Subscriber<Review> newFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() >= UNIX_FILTER_TIME,
-        review -> { // Todo write to file
+        review -> {
+          System.out.println("New: " + review);
+          // Todo write to file
         });
 
     broker.subscribe(oldFilter);
@@ -43,6 +48,14 @@ public final class FilterDemo {
 
     appThread.start();
     homeThread.start();
+
+    try {
+      appThread.join();
+      homeThread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    broker.shutdown();
 
   }
 

@@ -1,35 +1,46 @@
 package cs601.project2.Framework;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
 
 public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
-  private final Deque<T> itemsToPublish = new LinkedList<>();
+  private final PublishQueue<T> itemsToPublish = new PublishQueue<>();
   private final Thread reader = new Thread(this::readPublishers);
+
 
   public AsyncOrderedDispatchBroker() {
     reader.start();
   }
 
   private void readPublishers() {
-    synchronized (itemsToPublish) {
-      while (itemsToPublish.isEmpty()) {
-        try {
-          itemsToPublish.wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
+    while (true) {
+      T item = null;
+      try {
+        item = itemsToPublish.poll();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
       }
+      sendToSubcribers(item);
     }
-    subscribers.forEach(sub -> sub.onEvent(itemsToPublish.poll()));
-    // Todo check if this is blocking while publishers try to add
+  }
+
+  private void sendToSubcribers(T item) {
+    subscriberLock.readLock().lock();
+    try {
+      subscribers.forEach(sub -> sub.onEvent(item));
+    } finally {
+      subscriberLock.readLock().unlock();
+    }
   }
 
   @Override
   protected void publishNewItem(T item) {
     synchronized (itemsToPublish) {
-      itemsToPublish.add(item);
+      try {
+        itemsToPublish.add(item);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
       itemsToPublish.notifyAll();
     }
   }
