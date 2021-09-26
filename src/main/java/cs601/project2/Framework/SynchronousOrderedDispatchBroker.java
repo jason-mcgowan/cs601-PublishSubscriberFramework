@@ -26,6 +26,6 @@ public class SynchronousOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   @Override
   protected void publishRemainingBeforeShutdown() {
-    // Nothing extra to do here
+    // Nothing extra to do here (no publish backlog)
   }
 }

@@ -1,6 +1,7 @@
 package cs601.project2.FilterApp;
 
 import cs601.project2.Framework.AsyncOrderedDispatchBroker;
+import cs601.project2.Framework.AsyncUnorderedDispatchBroker;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.FilterSub;
 import cs601.project2.Framework.Subscriber;
@@ -17,8 +18,9 @@ public final class FilterDemo {
 
   public static void main(String[] args) {
 
-    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
+//    Broker<Review> broker = new SynchronousOrderedDispatchBroker<>();
 //    Broker<Review> broker = new AsyncOrderedDispatchBroker<>();
+    Broker<Review> broker = new AsyncUnorderedDispatchBroker<>();
 
     Subscriber<Review> oldFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() < UNIX_FILTER_TIME,

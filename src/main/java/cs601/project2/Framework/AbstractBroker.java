@@ -40,9 +40,8 @@ public abstract class AbstractBroker<T> implements Broker<T> {
     throwExceptionIfShutdown();
     subscriberLock.writeLock().lock();
     try {
-      publishRemainingBeforeShutdown();
-      subscribers.clear();
       isShutdown = true;
+      publishRemainingBeforeShutdown();
     } finally {
       subscriberLock.writeLock().unlock();
     }

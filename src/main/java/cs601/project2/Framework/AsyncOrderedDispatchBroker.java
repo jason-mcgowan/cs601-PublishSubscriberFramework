@@ -6,25 +6,7 @@ import java.util.concurrent.Executors;
 public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   private final PublishQueue<T> itemsToPublish = new PublishQueue<>();
-  private final Thread reader = new Thread(this::readPublishers);
-
-
-  public AsyncOrderedDispatchBroker() {
-    reader.start();
-    ExecutorService consumer = Executors.newSingleThreadExecutor();
-  }
-
-  private void readPublishers() {
-    while (true) {
-      T item = null;
-      try {
-        item = itemsToPublish.poll();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      sendToSubcribers(item);
-    }
-  }
+  private final ExecutorService publisher = Executors.newSingleThreadExecutor();
 
   private void sendToSubcribers(T item) {
     subscriberLock.readLock().lock();
@@ -37,18 +19,11 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   @Override
   protected void publishNewItem(T item) {
-    synchronized (itemsToPublish) {
-      try {
-        itemsToPublish.add(item);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      itemsToPublish.notifyAll();
-    }
+    // todo
   }
 
   @Override
   protected void publishRemainingBeforeShutdown() {
-
+    // todo
   }
 }
