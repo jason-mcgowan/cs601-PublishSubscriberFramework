@@ -1,5 +1,13 @@
 package cs601.project2.Framework;
 
+/*
+Design notes:
+1. This likely could have been implemented without the PublishQueue field by passing items to the
+single publisher thread.execute method as they arrive. However, I created the PublishQueue class
+to practice implementing and using a blocking queue.
+ */
+
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,12 +20,27 @@ import java.util.concurrent.Executors;
 public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   private final PublishQueue<T> itemsToPublish = new PublishQueue<>();
-  private final ExecutorService publisher = Executors.newSingleThreadExecutor();
 
-  private void sendToSubscribers(T item) {
+  public AsyncOrderedDispatchBroker() {
+    publishItemsAsTheyArrive();
+  }
+
+  private void publishItemsAsTheyArrive() {
+    ExecutorService publisher = Executors.newSingleThreadExecutor();
+    while (!isShutdown || !itemsToPublish.isEmpty()) {
+      try {
+        publisher.execute(sendToSubsTask(itemsToPublish.poll()));
+      } catch (InterruptedException e) {
+        // Nothing to do on interruption
+      }
+    }
+    publisher.shutdown();
+  }
+
+  private Runnable sendToSubsTask(T item) {
     subscriberLock.readLock().lock();
     try {
-      subscribers.forEach(sub -> sub.onEvent(item));
+      return () -> subscribers.forEach(sub -> sub.onEvent(item));
     } finally {
       subscriberLock.readLock().unlock();
     }
@@ -25,11 +48,15 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   @Override
   protected void publishNewItem(T item) {
-    // todo
+    try {
+      itemsToPublish.add(item);
+    } catch (InterruptedException e) {
+      // Nothing to do on interruption
+    }
   }
 
   @Override
   protected void publishRemainingBeforeShutdown() {
-    // todo
+    // Shutting down is handled in the publishItemsAsTheyArrive() method
   }
 }

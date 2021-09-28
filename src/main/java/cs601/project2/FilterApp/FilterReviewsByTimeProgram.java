@@ -3,6 +3,10 @@ package cs601.project2.FilterApp;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.FilterSub;
 import cs601.project2.Framework.Subscriber;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,16 +42,10 @@ public class FilterReviewsByTimeProgram implements Program {
 
     Subscriber<Review> oldFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() < filterTime,
-        review -> {
-//          System.out.println("Old: " + review);
-          // Todo write to file
-        });
+        review -> appendToFile(Paths.get(oldFileName), review));
     Subscriber<Review> recentFilter = new FilterSub<>(
         review -> review.getUnixReviewTime() >= filterTime,
-        review -> {
-//          System.out.println("New: " + review);
-          // Todo write to file
-        });
+        review -> appendToFile(Paths.get(recentFileName), review));
 
     broker.subscribe(oldFilter);
     broker.subscribe(recentFilter);
@@ -59,5 +57,13 @@ public class FilterReviewsByTimeProgram implements Program {
 
     pool.shutdown();
     broker.shutdown();
+  }
+
+  private void appendToFile(Path path, Review review) {
+    try {
+      Files.writeString(path, review.toString() + System.lineSeparator());
+    } catch (IOException e) {
+      Services.getInstance().getUi().displayMessage("Error writing to file: " + path);
+    }
   }
 }

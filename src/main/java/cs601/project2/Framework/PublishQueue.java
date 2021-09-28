@@ -52,4 +52,8 @@ public class PublishQueue<T> {
       lock.unlock();
     }
   }
+
+  public boolean isEmpty() {
+    return queue.isEmpty();
+  }
 }
