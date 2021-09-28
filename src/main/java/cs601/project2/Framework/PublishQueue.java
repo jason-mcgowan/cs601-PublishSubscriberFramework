@@ -5,6 +5,11 @@ import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Blocking queue of fixed max size.
+ *
+ * @author Jason McGowan
+ */
 public class PublishQueue<T> {
 
   private final Queue<T> queue = new LinkedList<>();

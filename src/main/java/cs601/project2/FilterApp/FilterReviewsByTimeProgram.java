@@ -6,6 +6,12 @@ import cs601.project2.Framework.Subscriber;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Takes any number of input files, filters them by the provided unix time, and prints them to two
+ * text files.
+ *
+ * @author Jason McGowan
+ */
 public class FilterReviewsByTimeProgram implements Program {
 
   Iterable<String> inputs;

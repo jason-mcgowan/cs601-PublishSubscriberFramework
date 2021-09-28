@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Methods for building a database from two files for Project1.
+ * Methods for parsing JSON objects from a file.
  *
  * @author Jason McGowan
  */
@@ -24,6 +24,10 @@ public final class FileJsonParser {
   private FileJsonParser() {
   }
 
+  /**
+   * Takes a file and parses each line from JSON to the provided object type, returned as a
+   * Collection. Ignores JSON syntax errors and IOExceptions.
+   */
   public static <T> Collection<T> parseFile(String fileName, Class<T> classType) {
 
     Path path = Paths.get(fileName);
@@ -33,7 +37,7 @@ public final class FileJsonParser {
     try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
       return lines.map(line -> parse(gson, line, classType)).collect(Collectors.toList());
     } catch (IOException e) {
-      System.out.println(e.getLocalizedMessage());
+      // Could pass an exception here if desired.
     }
     return new ArrayList<>();
   }
@@ -45,11 +49,6 @@ public final class FileJsonParser {
     try {
       return gson.fromJson(json, classType);
     } catch (JsonSyntaxException e) {
-      System.out.println(
-          "\nWarning! JSON syntax violation, omitting input: "
-              + json
-              + "\n"
-              + e.getLocalizedMessage());
       return null;
     }
   }

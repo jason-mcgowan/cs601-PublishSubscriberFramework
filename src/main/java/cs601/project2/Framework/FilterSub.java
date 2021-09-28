@@ -3,6 +3,12 @@ package cs601.project2.Framework;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Subscriber that takes a Predicate which, when checked for the published message, will execute the
+ * Consumer.
+ *
+ * @author Jason McGowan
+ */
 public class FilterSub<T> implements Subscriber<T> {
 
   private Predicate<T> filter;

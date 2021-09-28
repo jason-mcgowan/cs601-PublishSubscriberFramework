@@ -4,6 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Basic implementation of the Broker interface.
+ *
+ * @author Jason McGowan
+ */
 public abstract class AbstractBroker<T> implements Broker<T> {
 
   protected final List<Subscriber<T>> subscribers;

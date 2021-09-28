@@ -5,7 +5,7 @@ public interface Subscriber<T> {
   /**
    * Called by the Broker when a new item has been published.
    *
-   * @param item
+   * @author Jason McGowan
    */
   void onEvent(T item);
 }

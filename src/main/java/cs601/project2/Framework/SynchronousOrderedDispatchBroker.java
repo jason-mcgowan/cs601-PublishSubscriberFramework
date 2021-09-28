@@ -10,6 +10,8 @@ Would only be useful in the case where you had subscribers with downtime.
 
 /**
  * Blocks on any publish call until all subscribers complete processing.
+ *
+ * @author Jason McGowan
  */
 public class SynchronousOrderedDispatchBroker<T> extends AbstractBroker<T> {
 

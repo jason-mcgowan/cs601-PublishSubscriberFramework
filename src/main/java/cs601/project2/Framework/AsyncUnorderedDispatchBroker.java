@@ -4,6 +4,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Publishes items to subscribers in an asynchronous manner. Items are not guaranteed to be
+ * published to subscribers in order.
+ *
+ * @author Jason McGowan
+ */
 public class AsyncUnorderedDispatchBroker<T> extends AbstractBroker<T> {
 
   private final ExecutorService pool = Executors.newFixedThreadPool(

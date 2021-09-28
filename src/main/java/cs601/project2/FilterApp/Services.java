@@ -1,5 +1,10 @@
 package cs601.project2.FilterApp;
 
+/**
+ * Singleton to hold various global services.
+ *
+ * @author Jason McGowan
+ */
 public final class Services {
 
   private UserInterface ui;
@@ -27,6 +32,7 @@ public final class Services {
   }
 
   private static final class InstanceHolder {
+
     private static final Services instance = new Services();
   }
 }
