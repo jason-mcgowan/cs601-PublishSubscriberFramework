@@ -3,12 +3,13 @@ package cs601.project2.FilterApp;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.FilterSub;
 import cs601.project2.Framework.Subscriber;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Takes any number of input files, filters them by the provided unix time, and prints them to two
@@ -27,6 +28,9 @@ public class FilterReviewsByTimeProgram implements Program {
   private FilterReviewsByTimeProgram() {
   }
 
+  /**
+   * All arguments must be verified valid separately.
+   */
   public FilterReviewsByTimeProgram(Iterable<String> inputs, String recentFileName,
       String oldFileName, long filterTime, Broker<Review> broker) {
     this.inputs = inputs;
@@ -38,32 +42,63 @@ public class FilterReviewsByTimeProgram implements Program {
 
   @Override
   public void execute() {
-    ExecutorService pool = Executors.newCachedThreadPool();
+    // For benchmarking
+    long start = System.currentTimeMillis();
 
-    Subscriber<Review> oldFilter = new FilterSub<>(
-        review -> review.getUnixReviewTime() < filterTime,
-        review -> appendToFile(Paths.get(oldFileName), review));
-    Subscriber<Review> recentFilter = new FilterSub<>(
-        review -> review.getUnixReviewTime() >= filterTime,
-        review -> appendToFile(Paths.get(recentFileName), review));
+    try (BufferedWriter oldWriter = new BufferedWriter(new FileWriter(oldFileName, true));
+        BufferedWriter recentWriter = new BufferedWriter(new FileWriter(recentFileName, true))
+    ) {
 
-    broker.subscribe(oldFilter);
-    broker.subscribe(recentFilter);
+      // Create one subscriber each to filter out old or recent reviews and write them to file.
+      Subscriber<Review> oldFilter = new FilterSub<>(
+          review -> review.getUnixReviewTime() < filterTime,
+          review -> appendToFile(oldWriter, review));
+      Subscriber<Review> recentFilter = new FilterSub<>(
+          review -> review.getUnixReviewTime() >= filterTime,
+          review -> appendToFile(recentWriter, review));
 
-    inputs.forEach(input -> pool.execute(() ->
-        FileJsonParser.parseFile(input, Review.class)
-            .forEach(broker::publish)
-    ));
+      broker.subscribe(oldFilter);
+      broker.subscribe(recentFilter);
 
-    pool.shutdown();
-    broker.shutdown();
+      publishAll();
+
+      broker.shutdown();
+
+    } catch (IOException e) {
+      Services.getInstance().getUi()
+          .displayMessage("Error writing to file: " + e.getLocalizedMessage());
+    }
+
+    Services.getInstance().getUi()
+        .displayMessage("Shutdown complete, run time: " + (System.currentTimeMillis() - start));
   }
 
-  private void appendToFile(Path path, Review review) {
+  private void publishAll() {
+    // Cached thread pool, so we'll have one thread for each input file
+    ExecutorService pool = Executors.newCachedThreadPool();
+    for (String input : inputs) {
+      // Each file will be added to the thread pool for parsing and publishing
+      Collection<Review> reviews = FileJsonParser.parseFile(input, Review.class);
+      pool.execute(() -> reviews.forEach(broker::publish));
+    }
+
+    // Shutdown will allow the threads to finish publishing reviews.
+    pool.shutdown();
     try {
-      Files.writeString(path, review.toString() + System.lineSeparator());
+      // Block until the shutdown is complete (all threads finished publishing)
+      if (!pool.awaitTermination(1, TimeUnit.HOURS)) {
+        pool.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      // Nothing to do here
+    }
+  }
+
+  private void appendToFile(BufferedWriter bw, Review review) {
+    try {
+      bw.write(review + System.lineSeparator());
     } catch (IOException e) {
-      Services.getInstance().getUi().displayMessage("Error writing to file: " + path);
+      Services.getInstance().getUi().displayMessage("Error writing to file: " + bw);
     }
   }
 }

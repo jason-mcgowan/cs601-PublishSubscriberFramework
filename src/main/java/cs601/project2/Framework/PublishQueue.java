@@ -1,5 +1,9 @@
 package cs601.project2.Framework;
 
+/*
+Design note: Ended up not needing this, but kept it in for future reference.
+ */
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
