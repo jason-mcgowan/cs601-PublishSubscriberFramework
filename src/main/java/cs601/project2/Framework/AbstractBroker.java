@@ -1,6 +1,6 @@
 package cs601.project2.Framework;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,7 +16,7 @@ public abstract class AbstractBroker<T> implements Broker<T> {
   protected volatile boolean isShutdown;
 
   protected AbstractBroker() {
-    subscribers = new LinkedList<>();
+    subscribers = new ArrayList<>();
     subscriberLock = new ReentrantReadWriteLock(true);
     isShutdown = false;
   }

@@ -25,24 +25,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   private final List<ExecutorService> threads = new ArrayList<>();
-  private final ReentrantReadWriteLock threadsLock = new ReentrantReadWriteLock(true);
 
   @Override
   protected void handleNewSubscriber(Subscriber<T> subscriber) {
     super.handleNewSubscriber(subscriber);
-    threadsLock.writeLock().lock();
-    try {
+    synchronized (threads) {
       threads.add(Executors.newSingleThreadExecutor());
-    } finally {
-      threadsLock.writeLock().unlock();
     }
   }
 
   @Override
-  protected synchronized void publishNewItem(T item) {
-    for (int i = 0; i < subscribers.size(); i++) {
-      Subscriber<T> subscriber = subscribers.get(i);
-      threads.get(i).execute(() -> subscriber.onEvent(item));
+  protected void publishNewItem(T item) {
+    synchronized (threads) {
+      for (int i = 0; i < subscribers.size(); i++) {
+        Subscriber<T> subscriber = subscribers.get(i);
+        threads.get(i).execute(() -> subscriber.onEvent(item));
+      }
     }
   }
 
