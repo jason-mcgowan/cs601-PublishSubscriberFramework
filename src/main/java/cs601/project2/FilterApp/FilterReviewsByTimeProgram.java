@@ -49,16 +49,7 @@ public class FilterReviewsByTimeProgram implements Program {
         BufferedWriter recentWriter = new BufferedWriter(new FileWriter(recentFileName, true))
     ) {
 
-      // Create one subscriber each to filter out old or recent reviews and write them to file.
-      Subscriber<Review> oldFilter = new FilterSub<>(
-          review -> review.getUnixReviewTime() < filterTime,
-          review -> appendToFile(oldWriter, review));
-      Subscriber<Review> recentFilter = new FilterSub<>(
-          review -> review.getUnixReviewTime() >= filterTime,
-          review -> appendToFile(recentWriter, review));
-
-      broker.subscribe(oldFilter);
-      broker.subscribe(recentFilter);
+      setupSubscribers(oldWriter, recentWriter);
 
       publishAll();
 
@@ -71,6 +62,28 @@ public class FilterReviewsByTimeProgram implements Program {
 
     Services.getInstance().getUi()
         .displayMessage("Shutdown complete, run time: " + (System.currentTimeMillis() - start));
+  }
+
+  private void setupSubscribers(BufferedWriter oldWriter, BufferedWriter recentWriter) {
+    // Create one subscriber each to filter out old or recent reviews and write them to file.
+    Subscriber<Review> oldFilter = new FilterSub<>(
+        review -> review.getUnixReviewTime() < filterTime,
+        review -> appendToFile(oldWriter, review));
+    Subscriber<Review> recentFilter = new FilterSub<>(
+        review -> review.getUnixReviewTime() >= filterTime,
+        review -> appendToFile(recentWriter, review));
+
+    broker.subscribe(oldFilter);
+    broker.subscribe(recentFilter);
+  }
+
+  private void appendToFile(BufferedWriter bw, Review review) {
+    try {
+      bw.write(review + System.lineSeparator());
+    } catch (IOException e) {
+      Services.getInstance().getUi()
+          .displayMessage("Error writing to file: " + e.getLocalizedMessage());
+    }
   }
 
   private void publishAll() {
@@ -93,14 +106,6 @@ public class FilterReviewsByTimeProgram implements Program {
       }
     } catch (InterruptedException e) {
       // Nothing to do here
-    }
-  }
-
-  private void appendToFile(BufferedWriter bw, Review review) {
-    try {
-      bw.write(review + System.lineSeparator());
-    } catch (IOException e) {
-      Services.getInstance().getUi().displayMessage("Error writing to file: " + bw);
     }
   }
 }
