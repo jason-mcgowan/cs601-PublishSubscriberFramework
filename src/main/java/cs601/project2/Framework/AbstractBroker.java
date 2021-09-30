@@ -34,10 +34,14 @@ public abstract class AbstractBroker<T> implements Broker<T> {
     throwExceptionIfShutdown();
     subscriberLock.writeLock().lock();
     try {
-      subscribers.add(subscriber);
+      handleNewSubscriber(subscriber);
     } finally {
       subscriberLock.writeLock().unlock();
     }
+  }
+
+  protected void handleNewSubscriber(Subscriber<T> subscriber) {
+    subscribers.add(subscriber);
   }
 
   @Override
