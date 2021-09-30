@@ -2,6 +2,7 @@ package cs601.project2.Framework;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -10,6 +11,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Jason McGowan
  */
 public abstract class AbstractBroker<T> implements Broker<T> {
+
+  protected static final int SHUTDOWN_TIME_VALUE = 1;
+  protected static final TimeUnit SHUTDOWN_TIME_UNIT = TimeUnit.MINUTES;
 
   protected final List<Subscriber<T>> subscribers;
   protected final ReentrantReadWriteLock subscriberLock;

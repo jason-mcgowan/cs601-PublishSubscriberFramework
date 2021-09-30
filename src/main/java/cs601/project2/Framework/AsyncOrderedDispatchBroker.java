@@ -1,6 +1,6 @@
 /*
 Design notes
--Tried using self-implemented blocking queue, was as fast but hard to read.
+-Self-implemented blocking queue was no faster than single thread executor, and was harder to read.
 -Tried single thread executing each onEvent as a new task, super slow.
 -Tried single thread executing each publish to all subscribers as a task, much faster.
 -Checked both single-thread options with dummy time-consuming subscribers, little difference.
@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Publishes items to subscribers in an asynchronous manner. Items are guaranteed to be published to
@@ -57,7 +55,7 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
     threads.forEach(ExecutorService::shutdown);
     for (ExecutorService thread : threads) {
       try {
-        if (!thread.awaitTermination(1, TimeUnit.HOURS)) {
+        if (!thread.awaitTermination(SHUTDOWN_TIME_VALUE, SHUTDOWN_TIME_UNIT)) {
           // Could put some sort of error handling or exception here
           thread.shutdownNow();
         }

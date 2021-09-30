@@ -12,7 +12,6 @@ package cs601.project2.Framework;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Publishes items to subscribers in an asynchronous manner. Items are not guaranteed to be
@@ -41,7 +40,7 @@ public class AsyncUnorderedDispatchBroker<T> extends AbstractBroker<T> {
   protected void publishRemainingBeforeShutdown() {
     pool.shutdown();
     try {
-      if (!pool.awaitTermination(1, TimeUnit.HOURS)) {
+      if (!pool.awaitTermination(SHUTDOWN_TIME_VALUE, SHUTDOWN_TIME_UNIT)) {
         // Could put some sort of error handling or exception here
         pool.shutdownNow();
       }
