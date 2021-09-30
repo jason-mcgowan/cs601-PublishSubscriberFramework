@@ -4,7 +4,7 @@ Design notes
 -Tried single thread executing each onEvent as a new task, super slow.
 -Tried single thread executing each publish to all subscribers as a task, much faster.
 -Checked both single-thread options with dummy time-consuming subscribers, little difference.
--Best results were using a single thread for each subscriber.
+-Single thread per subscriber improved the run time immensely!
  */
 
 package cs601.project2.Framework;
@@ -39,18 +39,10 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
   }
 
   @Override
-  protected void publishNewItem(T item) {
-    threadsLock.readLock().lock();
-    subscriberLock.readLock().lock();
-
-    try {
-      for (int i = 0; i < subscribers.size(); i++) {
-        Subscriber<T> subscriber = subscribers.get(i);
-        threads.get(i).execute(() -> subscriber.onEvent(item));
-      }
-    } finally {
-      threadsLock.readLock().unlock();
-      subscriberLock.readLock().unlock();
+  protected synchronized void publishNewItem(T item) {
+    for (int i = 0; i < subscribers.size(); i++) {
+      Subscriber<T> subscriber = subscribers.get(i);
+      threads.get(i).execute(() -> subscriber.onEvent(item));
     }
   }
 
