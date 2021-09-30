@@ -27,6 +27,9 @@ public abstract class AbstractBroker<T> implements Broker<T> {
     publishNewItem(item);
   }
 
+  /**
+   * Method is executed after verified not shutdown. No locks or synchronization in place.
+   */
   protected abstract void publishNewItem(T item);
 
   @Override
@@ -40,6 +43,10 @@ public abstract class AbstractBroker<T> implements Broker<T> {
     }
   }
 
+  /**
+   * Allows derived classes to override functionality when a subscriber is added. This occurs during
+   * a write-lock on {@link #subscribers}.
+   */
   protected void handleNewSubscriber(Subscriber<T> subscriber) {
     subscribers.add(subscriber);
   }
@@ -56,6 +63,10 @@ public abstract class AbstractBroker<T> implements Broker<T> {
     }
   }
 
+  /**
+   * This occurs after {@link #isShutdown} is set to true and during a write-lock on {@link
+   * #subscribers}.
+   */
   protected abstract void publishRemainingBeforeShutdown();
 
   private void throwExceptionIfShutdown() {
