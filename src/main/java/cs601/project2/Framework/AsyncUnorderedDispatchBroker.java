@@ -10,8 +10,6 @@ Design notes:
 
 package cs601.project2.Framework;
 
-
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +26,7 @@ public class AsyncUnorderedDispatchBroker<T> extends AbstractBroker<T> {
 
   @Override
   protected void publishNewItem(T item) {
+    // Read lock to prevent new subscribers, add a new task to publish to all subscribers.
     subscriberLock.readLock().lock();
     try {
       pool.execute(() ->
