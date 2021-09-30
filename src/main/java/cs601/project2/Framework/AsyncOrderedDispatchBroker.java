@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Publishes items to subscribers in an asynchronous manner. Items are guaranteed to be published to
@@ -36,12 +37,16 @@ public class AsyncOrderedDispatchBroker<T> extends AbstractBroker<T> {
 
   @Override
   protected void publishNewItem(T item) {
-    // Lock on list to prevent interleaving
+    subscriberLock.readLock().lock();
     synchronized (threads) {
-      // Each thread publishes the item to its associated subscriber
-      for (int i = 0; i < subscribers.size(); i++) {
-        Subscriber<T> subscriber = subscribers.get(i);
-        threads.get(i).execute(() -> subscriber.onEvent(item));
+      try {
+        // Each thread publishes the item to its associated subscriber
+        for (int i = 0; i < subscribers.size(); i++) {
+          Subscriber<T> subscriber = subscribers.get(i);
+          threads.get(i).execute(() -> subscriber.onEvent(item));
+        }
+      } finally {
+        subscriberLock.readLock().unlock();
       }
     }
   }
