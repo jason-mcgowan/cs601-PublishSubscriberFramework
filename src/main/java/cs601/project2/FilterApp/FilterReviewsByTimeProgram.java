@@ -78,8 +78,10 @@ public class FilterReviewsByTimeProgram implements Program {
     ExecutorService pool = Executors.newCachedThreadPool();
     for (String input : inputs) {
       // Each file will be added to the thread pool for parsing and publishing
-      Collection<Review> reviews = FileJsonParser.parseFile(input, Review.class);
-      pool.execute(() -> reviews.forEach(broker::publish));
+      pool.execute(() -> {
+        Collection<Review> reviews = FileJsonParser.parseFile(input, Review.class);
+        reviews.forEach(broker::publish);
+      });
     }
 
     // Shutdown will allow the threads to finish publishing reviews.
