@@ -1,4 +1,6 @@
-package cs601.project2.FilterApp;
+package cs601.project2.AppCommon;
+
+import cs601.project2.FilterApp.Programs;
 
 /**
  * Singleton to hold various global services.

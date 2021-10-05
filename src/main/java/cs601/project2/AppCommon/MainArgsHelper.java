@@ -1,4 +1,4 @@
-package cs601.project2.FilterApp;
+package cs601.project2.AppCommon;
 
 import java.util.LinkedList;
 

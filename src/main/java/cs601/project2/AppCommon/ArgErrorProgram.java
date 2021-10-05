@@ -1,4 +1,7 @@
-package cs601.project2.FilterApp;
+package cs601.project2.AppCommon;
+
+import cs601.project2.AppCommon.Program;
+import cs601.project2.AppCommon.Services;
 
 /**
  * Program to display an error if the program environment was not correctly established.
