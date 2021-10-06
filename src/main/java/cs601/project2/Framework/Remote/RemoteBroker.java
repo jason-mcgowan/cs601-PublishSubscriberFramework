@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.Subscriber;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.Socket;
 
@@ -15,7 +17,7 @@ public class RemoteBroker<T> implements Broker<T> {
   private final Gson gson = new Gson();
   private final Broker<T> broker;
   private Socket socket;
-  private DataInputStream stream;
+  private BufferedReader fromProxy;
   private boolean listening;
 
   public RemoteBroker(Broker<T> broker) {
@@ -23,16 +25,20 @@ public class RemoteBroker<T> implements Broker<T> {
   }
 
   public synchronized void connectToProxy(String hostAddress, int port) throws IOException {
+    System.out.println("Connecting to server");
     socket = new Socket(hostAddress, port);
-    stream = new DataInputStream(socket.getInputStream());
+    fromProxy = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    System.out.println("Connected");
     listening = true;
     handleInputs();
   }
 
   private void handleInputs() throws IOException {
     while (listening) {
-      String json = stream.readUTF();
-      publish(gson.fromJson(json, type));
+      System.out.println("Reading data stream");
+      String json = fromProxy.readLine();
+      System.out.println("Read: " + json);
+//      publish(gson.fromJson(json, type));
     }
   }
 
@@ -51,7 +57,7 @@ public class RemoteBroker<T> implements Broker<T> {
     listening = false;
     try {
       socket.close();
-      stream.close();
+      fromProxy.close();
     } catch (IOException e) {
       // Add logging here if desired
     }
