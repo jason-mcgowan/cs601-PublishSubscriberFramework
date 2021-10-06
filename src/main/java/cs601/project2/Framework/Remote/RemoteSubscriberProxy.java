@@ -47,8 +47,9 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
   }
 
   private void sendItem(T item) {
+    String json = gson.toJson(item, type);
     for (ClientConnection client : clientConnections) {
-      client.handleMessage(item.toString());
+      client.handleMessage(json);
     }
   }
 }

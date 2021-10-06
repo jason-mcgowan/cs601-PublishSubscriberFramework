@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.Subscriber;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
@@ -25,20 +24,16 @@ public class RemoteBroker<T> implements Broker<T> {
   }
 
   public synchronized void connectToProxy(String hostAddress, int port) throws IOException {
-    System.out.println("Connecting to server");
     socket = new Socket(hostAddress, port);
     fromProxy = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-    System.out.println("Connected");
     listening = true;
     handleInputs();
   }
 
   private void handleInputs() throws IOException {
     while (listening) {
-      System.out.println("Reading data stream");
       String json = fromProxy.readLine();
-      System.out.println("Read: " + json);
-//      publish(gson.fromJson(json, type));
+      publish(gson.fromJson(json, type));
     }
   }
 
