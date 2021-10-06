@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.Subscriber;
+import cs601.project2.Framework.SynchronousOrderedDispatchBroker;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.Socket;
-
 
 /**
  * Takes messages over a java.net.Socket connection. Messages must be objects parsed to JSON string
@@ -32,10 +32,17 @@ public class RemoteBroker<T> implements Broker<T> {
   private Socket socket;
   private boolean listening;
 
+  private RemoteBroker() {
+    this.broker = new SynchronousOrderedDispatchBroker<>();
+  }
+
   public RemoteBroker(Broker<T> broker) {
     this.broker = broker;
   }
 
+  /**
+   * See {@link RemoteBroker} for instructions on use.
+   */
   public synchronized void connectToProxy(String hostAddress, int port) throws IOException {
     socket = new Socket(hostAddress, port);
     messenger = new SocketMessenger(socket);
@@ -43,6 +50,7 @@ public class RemoteBroker<T> implements Broker<T> {
     handleInputs();
   }
 
+  // Helper method for readability. Publishes received messages or shuts down.
   private void handleInputs() {
     while (listening) {
       String message = messenger.receiveMessage();

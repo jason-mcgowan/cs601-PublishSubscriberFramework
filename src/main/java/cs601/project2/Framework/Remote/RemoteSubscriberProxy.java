@@ -13,6 +13,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Instances of this class facilitate communication between a local {@link
+ * cs601.project2.Framework.Broker} and any number of remote {@link RemoteBroker} through a {@link
+ * Socket}. Accepts all connection requests on the specified port. Any items published to this
+ * {@link Subscriber} will be parsed to JSON and sent as a String to all remote connections.
+ *
+ * @author Jason McGowan
+ */
 public class RemoteSubscriberProxy<T> implements Subscriber<T> {
 
   private final Type type = new TypeToken<T>() {
@@ -24,6 +32,12 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
   private final ReentrantLock messageLock = new ReentrantLock();
   private ServerSocket server;
 
+  /**
+   * Constructor immediately opens a {@link ServerSocket} and begins listening for connections on
+   * the specified port.
+   *
+   * @param port Port to listen for incoming connections.
+   */
   public RemoteSubscriberProxy(int port) {
     try {
       server = new ServerSocket(port);
@@ -33,6 +47,7 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
     connectionListenerThread.execute(this::listenForClients);
   }
 
+  // Waits for connection request, sets up a new thread and socket messenger.
   private void listenForClients() {
     try {
       while (!server.isClosed()) {
@@ -48,9 +63,13 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
     }
   }
 
+  /**
+   * Sends the "Poison Pill" end of transmission message to all remote brokers. Shuts down all
+   * internal threads, sockets, and associated services.
+   */
   public void shutdown() {
     messageLock.lock();
-    sendAllClientsMessage(RemoteBroker.POISON_PILL);
+    sendClientsMessage(RemoteBroker.POISON_PILL);
     connectionListenerThread.shutdown();
     messageThreads.forEach(ExecutorService::shutdown);
     socketMessengers.forEach(SocketMessenger::shutdown);
@@ -65,10 +84,10 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
   @Override
   public void onEvent(T item) {
     String message = gson.toJson(item, type);
-    sendAllClientsMessage(message);
+    sendClientsMessage(message);
   }
 
-  private void sendAllClientsMessage(String message) {
+  private void sendClientsMessage(String message) {
     messageLock.lock();
     for (int i = 0; i < socketMessengers.size(); i++) {
       SocketMessenger sm = socketMessengers.get(i);

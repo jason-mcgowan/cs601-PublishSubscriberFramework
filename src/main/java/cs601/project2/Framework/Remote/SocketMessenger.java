@@ -7,6 +7,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+/**
+ * Class to hold the reader and writer of a socket connection. Contains methods to send and receive
+ * string messages over the connection, and to shut down same reader and writer.
+ *
+ * @author Jason McGowan
+ */
 public class SocketMessenger {
 
   private BufferedWriter send;
@@ -21,6 +27,10 @@ public class SocketMessenger {
     }
   }
 
+  /**
+   * Sends the message as a String line to the socket listener. A new line character is
+   * automatically appended as part of the protocol.
+   */
   public void sendMessage(String message) {
     try {
       send.write(message);
@@ -40,6 +50,9 @@ public class SocketMessenger {
     return null;
   }
 
+  /**
+   * Closes the socket stream reader and writer.
+   */
   public void shutdown() {
     try {
       send.close();
