@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,8 +26,8 @@ public class RemoteSubscriberProxy<T> implements Subscriber<T> {
   private final Type type = new TypeToken<T>() {
   }.getType();
   private final Gson gson = new Gson();
-  private final List<ExecutorService> messageThreads = new LinkedList<>();
-  private final List<SocketMessenger> socketMessengers = new LinkedList<>();
+  private final List<ExecutorService> messageThreads = new ArrayList<>();
+  private final List<SocketMessenger> socketMessengers = new ArrayList<>();
   private final ExecutorService connectionListenerThread = Executors.newSingleThreadExecutor();
   private final ReentrantLock messageLock = new ReentrantLock();
   private ServerSocket server;
