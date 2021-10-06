@@ -4,19 +4,32 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import cs601.project2.Framework.Broker;
 import cs601.project2.Framework.Subscriber;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.Socket;
 
+
+/**
+ * Takes messages over a java.net.Socket connection. Messages must be objects parsed to JSON string
+ * lines. Instances must be initialized with a {@link Broker} passed to the constructor {@link
+ * #RemoteBroker(Broker)}. Connection to {@link RemoteSubscriberProxy} is then made using {@link
+ * #connectToProxy(String, int)}. All messages received over this connection must be objects parsed
+ * to JSON and sent as String lines. The messages will then be parsed back to type {@link T} and
+ * immediately published using the provided {@link #broker}. Instance will shut itself down and the
+ * {@link #broker} when the remote server sends the end of transmission message.
+ *
+ * @author Jason McGowan
+ */
 public class RemoteBroker<T> implements Broker<T> {
 
-  private final Type type = new TypeToken<T>(){}.getType();
+  public static final String POISON_PILL = "32214a33-b382-4b8a-891d-5675478ca834";
+
+  private final Type type = new TypeToken<T>() {
+  }.getType();
   private final Gson gson = new Gson();
   private final Broker<T> broker;
+  private SocketMessenger messenger;
   private Socket socket;
-  private BufferedReader fromProxy;
   private boolean listening;
 
   public RemoteBroker(Broker<T> broker) {
@@ -25,15 +38,20 @@ public class RemoteBroker<T> implements Broker<T> {
 
   public synchronized void connectToProxy(String hostAddress, int port) throws IOException {
     socket = new Socket(hostAddress, port);
-    fromProxy = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    messenger = new SocketMessenger(socket);
     listening = true;
     handleInputs();
   }
 
-  private void handleInputs() throws IOException {
+  private void handleInputs() {
     while (listening) {
-      String json = fromProxy.readLine();
-      publish(gson.fromJson(json, type));
+      String message = messenger.receiveMessage();
+      if (!message.equals(POISON_PILL)) {
+        publish(gson.fromJson(message, type));
+      } else {
+        listening = false;
+        shutdown();
+      }
     }
   }
 
@@ -51,8 +69,8 @@ public class RemoteBroker<T> implements Broker<T> {
   public synchronized void shutdown() {
     listening = false;
     try {
+      messenger.shutdown();
       socket.close();
-      fromProxy.close();
     } catch (IOException e) {
       // Add logging here if desired
     }
