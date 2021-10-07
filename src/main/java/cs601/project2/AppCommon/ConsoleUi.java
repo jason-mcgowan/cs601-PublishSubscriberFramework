@@ -1,4 +1,4 @@
-package cs601.project2.FilterApp;
+package cs601.project2.AppCommon;
 
 /**
  * Displays messages to the system console.
