@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class FilterReviewsByTimeProgram implements Program {
 
-  Iterable<String> inputs;
-  String recentFileName;
-  String oldFileName;
-  long filterTime;
-  Broker<Review> broker;
+  private Iterable<String> inputs;
+  private String recentFileName;
+  private String oldFileName;
+  private long filterTime;
+  private Broker<Review> broker;
 
   private FilterReviewsByTimeProgram() {
   }
